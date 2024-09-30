@@ -15,16 +15,27 @@ export class MyCard extends LitElement {
   constructor() {
     super();
 
-    this.title = "Title";
-    this.description = "Description";
-    this.image = "https://cdn.dealeraccelerate.com/rkm/1/2554/160641/1920x1440/w/1969-ford-mustang";
-    this.link = "https://hax.psu.edu";
+    this.title = "";
+    this.description = "";
+    this.image = null;
+    this.link = "#";
+    this.fancy = false;
   }
 
   static get styles() {
     return css`
       :host {
         display: block;
+        
+      }
+      :host([fancy]) {
+        display: inline-block;
+        padding: 16px;
+        background-color: #77b5b8;
+        border-radius: 8px;
+        border: 2px solid grey;
+        box-shadow: 4px 4px 4px grey;
+
       }
       .card {
         width: 400px;
@@ -74,10 +85,10 @@ export class MyCard extends LitElement {
 
 
       .alter {
-        border: 2px solid black;
-        color: white;
-        border-radius: 8px;
-        padding: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
         margin: 16px 24px;
         font-size: 24px;
         text-decoration: none;
@@ -96,6 +107,27 @@ export class MyCard extends LitElement {
         color: red;
         transition-duration: 0.3s
       }
+
+      details summary {
+    text-align: middle;
+    font-size: 20px;
+    padding: 8px 0;
+      }
+
+      details[open] summary {
+    font-weight: bold;
+    }
+  
+  details div {
+    border: 2px solid black;
+    border-radius: 12px;
+    text-align: center;
+    padding: 6px;
+    height: 60px;
+    margin: 16px;
+    overflow: auto;
+  }
+
 
       @media  only screen and (min-width: 500px) and (max-width: 800px) {
         .image, h1, p {
@@ -127,38 +159,59 @@ export class MyCard extends LitElement {
     `;
   }
 
+  openChanged(e) {
+    console.log(e.newState);
+    if (e.newState === "open") {
+      this.fancy = true;
+    }
+    else {
+      this.fancy = false;
+    }
+  }
+
   render() {
     return html`
       <div class="wrapper">
         <div class="card">
-          <div class="image">
+          <slot class="image">
             <img src="${this.image}" alt="${this.title}">
-          </div>
-          <h1 class="card-title">${this.title}</h1>
-          <p>${this.description}</p>
+           </slot>
+          <h1 class="card-title"><slot name="card-title">${this.title}</slot></h1>
+          <details ?open="${this.fancy}" @toggle="${this.openChanged}">
+            <summary>Description</summary>
+            <div>
+              <slot>${this.description}</slot>
+            </div>
+          </details>
           <div>
             <a href="${this.link}">
               <button class="bbutton">Details</button>
             </a>
           </div>
           <div class="alter">
-           <button class="duplicate extras">Clone Card</button>
-           <button class="bg-change extras">Change Background</button>
-           <button class="change-title extras">Change Title</button>
-           <button class="change-image extras">Change Image</button>
-           <button class="delete-card extras">Delete Card</button>
+            <slot name="cardButtons">
+              <button class="duplicate extras">Clone Card</button>
+              <button class="bg-change extras">Change Background</button>
+              <button class="change-title extras">Change Title</button>
+              <button class="change-image extras">Change Image</button>
+              <button class="delete-card extras">Delete Card</button>
+              </slot>
           </div>
         </div>
       </div>
     `;
   }
 
+  
+
   static get properties() {
     return {
       title: { type: String },
       description: { type: String },
       image: { type: String },
-      link: { type: String }
+      link: { type: String },
+      fancy: { type: Boolean, reflect: true }
+
     };
   }
 }
